@@ -53,9 +53,8 @@ getSomethingForCurrentTime = ->
   numRanges = timeRanges.length
   myIndex = null
   for v,i in timeRanges
-    do (i,v) ->
-      if minutesSinceMidnight > v
-        myIndex = i
+    break unless minutesSinceMidnight > v
+    myIndex = i
   
   thingsAvailableAtTime[myIndex]()
   
