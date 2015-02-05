@@ -1,0 +1,55 @@
+<!doctype html>
+<html>
+<head>
+<title></title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    .commandInput { width: 95%; }
+  </style>
+  <script type="text/javascript">
+    function PositionInfo(){
+      this.coords = null;
+      this.position = null;
+      this.coordsJSON = null;
+      var posHandler = function(position){
+        this.coords = position.coords;
+        this.position = position
+        this.coordsJSON = JSON.stringify(this.coords, null, 2);
+        console.log("position info", this.position);
+      };
+      var errorHandler = function(err){
+        if (err){
+          console.log("error fetching location info", err);
+        }
+      };
+      navigator.geolocation.getCurrentPosition(
+        posHandler,
+        errorHandler,
+        {enableHighAccuracy: false, timeout: 5000, maximumAge: 60000}
+      );
+    }
+
+    var positionInfo = new PositionInfo();
+  </script>
+</head>
+<body>
+
+<div ng-controller="LocationController">
+  <div ng-show="err">Unable to obtain location data, code {{err.code}}</div>
+  <pre class="panel" ng-hide="err" class="debug">{{coordsJSON}}</pre>
+  <div ng-show="entries">
+    <ul>
+      <li ng-repeat="entry in entries">{{entry.coords.longitude}}</li>
+    </ul>
+  </div>
+  <div>
+    <button type="button" class="btn btn-info btn-small" ng-click="logCurrentPosition()">Log Location</button>
+    <hr/>
+    <button type="button" class="btn btn-info btn-small" ng-click="startEcho()">Echo!</button>
+    <button type="button" class="btn btn-info btn-small" ng-click="stopEcho()">Stop Echo!</button>
+    <hr/>
+    <button class="btn btn-info btn-small" ng-click="timeRest()">Rest</button>
+</div>
+</div>
+</body>
+</html>
