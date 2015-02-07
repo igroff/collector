@@ -7,6 +7,24 @@
   </style>
   <script type="text/javascript" src="js/coffee-script.js"></script>
   <script type="text/coffeescript" src="coffee/data.coffee"></script>
+  <script type="text/coffeescript">
+    defaultData =
+      lastCheck: new Date()
+      collected: []
+    storageKey = "storedHereMang"
+
+    userData = localStorage.getItem(storageKey)
+    try
+      userData = JSON.parse(userData) # if we got it from local storage, we'll need to turn it into an object
+    catch
+      userData = defaultData
+
+    userData.lastCheck = new Date()
+    userData.collected.push getSomethingStraightUp()
+
+    console.log userData.collected
+    localStorage.setItem storageKey, JSON.stringify(userData)
+  </script>
   <script type="text/javascript">
     function PositionInfo(){
       this.coords = null;

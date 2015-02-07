@@ -8,13 +8,13 @@ normal:
   rare:      (x for x in [1..75])
   uncommon:  (x for x in [101..250])
   common:    (x for x in [501..750])
-timeBased:
+collections.timeBased=
   elite:     (x for x in [837..840])
   ultraRare: (x for x in [831..836])
   rare:      (x for x in [821..830])
   uncommon:  (x for x in [801..820])
   common:    (x for x in [751..800])
-geographyBased:
+collections.geographyBased=
   elite:     (x for x in [897..900])
   ultraRare: (x for x in [891..896])
   rare:      (x for x in [881..890])
@@ -77,5 +77,8 @@ getSomethingStraightUp = ->
   set = collections.normal[getRandomRarity()]
   index = Math.floor(Math.random() * (1 + set.length))
   set[index]
+
+if window
+  window.getSomethingStraightUp = getSomethingStraightUp
 
 console.log getSomethingStraightUp()
