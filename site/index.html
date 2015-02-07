@@ -4,8 +4,24 @@
 <title></title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
+    /* allow room for 3 columns */
+    ul {
+      width: 30em;
+    }  /* float & allow room for the widest item */
+    ul li {
+      float: left; width: 10em; 
+    }  /* stop the float */
+    li { text-decoration: none; } 
+    br {
+      clear: left;
+    }  /* separate the list from subsequent markup */
+    div.wrapper {
+      margin-bottom: 1em;
+    }
   </style>
   <script type="text/javascript" src="js/coffee-script.js"></script>
+  <script type="text/javascript" src="js/reactive.js"></script>
+  <script type="text/javascript" src="js/jquery.min.js"></script>
   <script type="text/coffeescript" src="coffee/data.coffee"></script>
   <script type="text/coffeescript">
     defaultData =
@@ -15,8 +31,10 @@
 
     userData = localStorage.getItem(storageKey)
     try
+      throw "no data" unless userData
       userData = JSON.parse(userData) # if we got it from local storage, we'll need to turn it into an object
     catch
+      # if we had a failure converting it to an object, we'll just start over
       userData = defaultData
 
     userData.lastCheck = new Date()
@@ -24,6 +42,14 @@
 
     console.log userData.collected
     localStorage.setItem storageKey, JSON.stringify(userData)
+    template = """
+      <div class="wrapper">
+        <ul>
+          <li each="collected">{item}: {type}</li>
+        </ul>
+      </div>
+    """
+    $( $("#container").append(reactive(template, userData).el) )
   </script>
   <script type="text/javascript">
     function PositionInfo(){
@@ -47,11 +73,11 @@
         {enableHighAccuracy: false, timeout: 5000, maximumAge: 60000}
       );
     }
-
     var positionInfo = new PositionInfo();
+  </script>
   </script>
 </head>
 <body>
-
+  <div id="container"></div>
 </body>
 </html>

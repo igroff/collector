@@ -74,11 +74,12 @@ getRandomRarity = ->
   rarity
 
 getSomethingStraightUp = ->
-  set = collections.normal[getRandomRarity()]
+  rarity = getRandomRarity()
+  set = collections.normal[rarity]
   index = Math.floor(Math.random() * (1 + set.length))
-  set[index]
+  item:set[index], type:rarity
 
 if window
   window.getSomethingStraightUp = getSomethingStraightUp
-
-console.log getSomethingStraightUp()
+if typeof(windows) is "undefined"
+  console.log getSomethingStraightUp()
