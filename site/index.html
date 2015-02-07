@@ -4,8 +4,9 @@
 <title></title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
-    .commandInput { width: 95%; }
   </style>
+  <script type="text/javascript" src="js/coffee-script.js"></script>
+  <script type="text/coffeescript" src="coffee/data.coffee"></script>
   <script type="text/javascript">
     function PositionInfo(){
       this.coords = null;
@@ -34,22 +35,5 @@
 </head>
 <body>
 
-<div ng-controller="LocationController">
-  <div ng-show="err">Unable to obtain location data, code {{err.code}}</div>
-  <pre class="panel" ng-hide="err" class="debug">{{coordsJSON}}</pre>
-  <div ng-show="entries">
-    <ul>
-      <li ng-repeat="entry in entries">{{entry.coords.longitude}}</li>
-    </ul>
-  </div>
-  <div>
-    <button type="button" class="btn btn-info btn-small" ng-click="logCurrentPosition()">Log Location</button>
-    <hr/>
-    <button type="button" class="btn btn-info btn-small" ng-click="startEcho()">Echo!</button>
-    <button type="button" class="btn btn-info btn-small" ng-click="stopEcho()">Stop Echo!</button>
-    <hr/>
-    <button class="btn btn-info btn-small" ng-click="timeRest()">Rest</button>
-</div>
-</div>
 </body>
 </html>
