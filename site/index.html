@@ -18,9 +18,11 @@
     div.wrapper {
       margin-bottom: 1em;
     }
+    .hidden { display: none; }
   </style>
   <script type="text/javascript" src="js/coffee-script.js"></script>
   <script type="text/javascript" src="js/reactive.js"></script>
+  <script type="text/javascript" src="js/lodash.min.js"></script>
   <script type="text/javascript" src="js/jquery.min.js"></script>
   <script type="text/coffeescript" src="coffee/data.coffee"></script>
   <script type="text/coffeescript">
@@ -38,18 +40,32 @@
       userData = defaultData
 
     userData.lastCheck = new Date()
-    userData.collected.push getSomethingStraightUp()
+    # get a new 'normal' one
+    itemFound = getSomethingStraightUp()
+    itemFound.count = 1
+    itemFound.lastFound = new Date()
+    if itemFound
+      existingItem = _.find(userData.collected, (i) -> i.item is itemFound.item)
+      if existingItem
+        existingItem.count += itemFound.count
+        existingItem.lastFound = itemFound.lastFound
+      else
+        userData.collected.push itemFound
 
-    console.log userData.collected
     localStorage.setItem storageKey, JSON.stringify(userData)
     template = """
+      <div>
+        You found: <span>{justFound.item}: {justFound.type}</span>
+      </div>
       <div class="wrapper">
         <ul>
-          <li each="collected">{item}: {type}</li>
+          <li each="data.collected">{item}: {type} <span data-visible="moreThanOne">{moreThanOne}({count})</span></li>
         </ul>
       </div>
     """
-    $( $("#container").append(reactive(template, userData).el) )
+    _.each(userData.collected, (i) -> i.moreThanOne = (i?.count > 1))
+    userData.collected = _.sortBy(userData.collected, (i) -> i.item)
+    $( $("#container").append(reactive(template, data: userData, justFound:itemFound).el) )
   </script>
   <script type="text/javascript">
     function PositionInfo(){
