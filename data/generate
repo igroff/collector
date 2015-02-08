@@ -1,0 +1,41 @@
+#! /usr/bin/env ./node_modules/.bin/coffee
+# vi:ft=coffee
+#
+_    = require 'lodash'
+fs   = require 'fs'
+path = require 'path'
+
+if !process.argv[2] or !fs.existsSync(process.argv[2])
+  console.error "you must provide a data location"
+  process.exit 1
+
+collections=
+normal:
+  elite:     (id:x for x in [401..475])
+  ultraRare: (id:x for x in [301..375])
+  rare:      (id:x for x in [1..75])
+  uncommon:  (id:x for x in [101..250])
+  common:    (id:x for x in [501..750])
+collections.timeBased=
+  elite:     (id:x for x in [837..840])
+  ultraRare: (id:x for x in [831..836])
+  rare:      (id:x for x in [821..830])
+  uncommon:  (id:x for x in [801..820])
+  common:    (id:x for x in [751..800])
+collections.geographyBased=
+  elite:     (id:x for x in [897..900])
+  ultraRare: (id:x for x in [891..896])
+  rare:      (id:x for x in [881..890])
+  uncommon:  (id:x for x in [871..880])
+  common:    (id:x for x in [840..870])
+
+_.each collections, (collection, name) ->
+  _.each collection, (items, rarity) ->
+    _.each items, (i) ->
+      i.name = i.id + ""
+      extraDataPath = path.join(process.argv[2], name, rarity, String(i.id) + ".json")
+      if fs.existsSync(extraDataPath)
+        data = JSON.parse fs.readFileSync(extraDataPath)
+        _.extend i, data
+
+console.log JSON.stringify(collections)
