@@ -9,6 +9,8 @@ if !process.argv[2] or !fs.existsSync(process.argv[2])
   console.error "you must provide a data location"
   process.exit 1
 
+varName = process.argv[3]
+
 collections=
 normal:
   elite:     (id:x for x in [401..475])
@@ -38,4 +40,7 @@ _.each collections, (collection, name) ->
         data = JSON.parse fs.readFileSync(extraDataPath)
         _.extend i, data
 
-console.log JSON.stringify(collections)
+if varName
+  console.log "#{varName}=#{JSON.stringify(collections)};"
+else
+  console.log JSON.stringify(collections)
