@@ -1,5 +1,6 @@
 SHELL=/usr/bin/env bash
 .SHELLOPTS=-O globstar
+# the paths to all the coffee files under the app/ dir
 appcoffee := $(shell bash -c "shopt -s globstar ; echo app/**/*.coffee")
 
 serve: build site/app.js site/vendor.js
