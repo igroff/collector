@@ -9,6 +9,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "brunch": "^1.7.20",
     "coffee-script": "^1.9.0",
     "lodash": "^3.1.0",
     "supervisor": "^0.6.0"
