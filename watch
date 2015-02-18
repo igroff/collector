@@ -1,0 +1,62 @@
+#! /usr/bin/env bash
+
+set -e 
+
+HANDLER_DIR=${1?You need to provide a directory containing event handlers}
+shift
+
+if [ $# -eq 0 ]; then
+  printf "You must provide a list of directories to watch"
+  exit 1
+fi
+WATCH_DIRS=${@}
+
+function exec_and_continue(){
+  set +e
+  $1 $2
+  set -e
+}
+
+function abspath {
+    if [[ -d "$1" ]]; then
+        pushd "$1" >/dev/null
+        pwd
+        popd >/dev/null
+    elif [[ -e $1 ]]; then
+        pushd "$(dirname "$1")" >/dev/null
+        echo "$(pwd)/$(basename "$1")"
+        popd >/dev/null
+    else
+        echo "$1" does not exist! >&2
+        return 127
+    fi
+}
+
+while read -r line;
+do
+  FILE_PATH=$(abspath $line)
+  FILE_NAME=$(basename ${FILE_PATH})
+  EXT=${FILE_NAME##*.}
+  # first we fire the 'everytime' handler if it exists, this one
+  # gets called all the time, more specific handlers will be called after this one
+  if [ -x "${HANDLER_DIR}/handle_file_change.everytime" ]; then
+    exec_and_continue "${HANDLER_DIR}/handle_file_change.everytime" "${FILE_PATH}"
+  fi
+  # the first one of these handlers to 'hit' will cause the execution of further handlers
+  # to stop, and we'll move on to the next event
+  # first we fire the 'all' handler if it exists
+  if [ -x "${HANDLER_DIR}/handle_file_change.all" ]; then
+    exec_and_continue "${HANDLER_DIR}/handle_file_change.all" "${FILE_PATH}"
+    continue
+  fi
+  # then we fire any individual file handlers we have (by extension)
+  if [ -x "${HANDLER_DIR}/handle_file_change.${EXT}" ]; then
+    exec_and_continue "${HANDLER_DIR}/handle_file_change.${EXT}" "${FILE_PATH}"
+    continue
+  fi
+  # if we've not handled anything we give the chance to the 'any' handler
+  if [ -x "${HANDLER_DIR}/handle_file_change.any" ]; then
+    exec_and_continue "${HANDLER_DIR}/handle_file_change.any" "${FILE_PATH}"
+    continue
+  fi
+done < <(inotifywait -e close_nowrite,close_write --format '%w%f' -m -r ${WATCH_DIRS})

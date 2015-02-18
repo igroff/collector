@@ -1,2 +1,5 @@
 *.swp
 node_modules/
+site/app.js
+site/vendor.js
+site/js/data.js
