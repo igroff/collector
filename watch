@@ -26,9 +26,11 @@ function abspath {
         pushd "$(dirname "$1")" >/dev/null
         echo "$(pwd)/$(basename "$1")"
         popd >/dev/null
+    elif [[ ${1:0:1} != "/" ]]; then
+        echo "$(pwd)/${1}"
     else
-        echo "$1" does not exist! >&2
-        return 127
+        # it's already absolute
+        echo "$1"
     fi
 }
 
@@ -59,4 +61,4 @@ do
     exec_and_continue "${HANDLER_DIR}/handle_file_change.any" "${FILE_PATH}"
     continue
   fi
-done < <(inotifywait -e close_nowrite,close_write --format '%w%f' -m -r ${WATCH_DIRS})
+done < <(inotifywait -e close_write,delete --format '%w%f' -m -r ${WATCH_DIRS})
