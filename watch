@@ -81,8 +81,11 @@ do
   # The directory containing the file that changed, we use this to find any
   # directory specific handlers
   CHANGED_FILE_DIR=$(dirname ${FILE_PATH})
-  # find a handler and invoke it, if at all possible 
+  # find a handler and invoke it, if at all possible first by checking the
+  # directory in which the change occurred
   if ! find_and_invoke_handler ${CHANGED_FILE_DIR} ${FILE_PATH}; then
+    # if there's no handler local to the directory containing the changed file
+    # then we look in the 'global' handler directory
     if ! find_and_invoke_handler ${HANDLER_DIR} ${FILE_PATH}; then
       printf "couldn't find any handlers for changed file %s", ${FILE_PATH}
       exit 1
