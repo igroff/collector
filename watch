@@ -39,13 +39,9 @@ function abspath {
     fi
 }
 
-while read -r line;
-do
-  # we want the absolute path so we can pass it to our handlers
-  FILE_PATH=$(abspath $line)
-  # as a convenience we allow handlers by extension, so we'll pick off the extension
-  # for use in finding any handlers we may have
-  EXT=${FILE_PATH##*.}
+function find_and_invoke_handler(){
+  local HANDLER_DIR=${1}
+  local FILE_PATH=${2}
   # first we fire the 'everytime' handler if it exists, this one
   # gets called all the time, more specific handlers will be called after this one
   if [ -x "${HANDLER_DIR}/handle_file_change.everytime" ]; then
@@ -56,18 +52,40 @@ do
   # fire the 'all' handler if it exists.
   if [ -x "${HANDLER_DIR}/handle_file_change.all" ]; then
     exec_and_continue "${HANDLER_DIR}/handle_file_change.all" "${FILE_PATH}"
-    continue
+    return 0
   fi
   # then we fire any individual file handlers we have (by extension)
   if [ -x "${HANDLER_DIR}/handle_file_change.${EXT}" ]; then
     exec_and_continue "${HANDLER_DIR}/handle_file_change.${EXT}" "${FILE_PATH}"
-    continue
+    return 0
   fi
   # if we've not handled anything we give the chance to the 'any' handler
   # this one will only fire in the case that the neither the all nor a extension
   # specific handler has fired
   if [ -x "${HANDLER_DIR}/handle_file_change.any" ]; then
     exec_and_continue "${HANDLER_DIR}/handle_file_change.any" "${FILE_PATH}"
-    continue
+    return 0
+  fi
+  return 1
+}
+
+export -f find_and_invoke_handler
+
+while read -r line;
+do
+  # we want the absolute path so we can pass it to our handlers
+  FILE_PATH=$(abspath $line)
+  # as a convenience we allow handlers by extension, so we'll pick off the extension
+  # for use in finding any handlers we may have
+  EXT=${FILE_PATH##*.}
+  # The directory containing the file that changed, we use this to find any
+  # directory specific handlers
+  CHANGED_FILE_DIR=$(dirname ${FILE_PATH})
+  # find a handler and invoke it, if at all possible 
+  if ! find_and_invoke_handler ${CHANGED_FILE_DIR} ${FILE_PATH}; then
+    if ! find_and_invoke_handler ${HANDLER_DIR} ${FILE_PATH}; then
+      printf "couldn't find any handlers for changed file %s", ${FILE_PATH}
+      exit 1
+    fi
   fi
 done < <(inotifywait -e close_write,delete --format '%w%f' -m -r ${WATCH_DIRS})
