@@ -4,6 +4,12 @@ set -e
 if [ "${1}" = "-h" ]; then
   printf "Usage:\n"
   printf "  %s handler_directory (list of directories to watch)\n" $(basename $0)
+  printf "\nYou can put handlers in a central location specified by the\n"
+  printf "handler_directory parameter, or in any watched directory. Handlers\n"
+  printf "in watched directories take precdence over global handlers.\n"
+  printf "\nhandler file name format:\n"
+  printf "\n    handle_file_change.[everytime|all|<extension>]\n"
+  printf "\n"
   exit 0
 fi
 
