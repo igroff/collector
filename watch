@@ -1,6 +1,7 @@
 #! /usr/bin/env bash
 
 set -e 
+set -u
 if [ "${1}" = "-h" ]; then
   printf "Usage:\n"
   printf "  %s handler_directory (list of directories to watch)\n" $(basename $0)
@@ -13,7 +14,7 @@ if [ "${1}" = "-h" ]; then
   exit 0
 fi
 
-HANDLER_DIR=${1?You need to provide a directory containing event handlers}
+GLOBAL_HANDLER_DIR=${1?You need to provide a directory containing event handlers}
 shift
 
 if [ $# -eq 0 ]; then
@@ -24,6 +25,7 @@ WATCH_DIRS=${@}
 
 function exec_and_continue(){
   set +e
+  export WATCH_ROOT=$(pwd)
   $1 $2
   set -e
 }
@@ -48,31 +50,41 @@ function abspath {
 function find_and_invoke_handler(){
   local HANDLER_DIR=${1}
   local FILE_PATH=${2}
+  # as a convenience we allow handlers by extension, so we'll pick off the extension
+  # for use in finding any handlers we may have
+  local EXT=${FILE_PATH##*.}
+  local HANDLED=
+  printf "looking for files in: %s to handle: %s\n" "${HANDLER_DIR}" "${FILE_PATH}"
   # first we fire the 'everytime' handler if it exists, this one
   # gets called all the time, more specific handlers will be called after this one
-  if [ -x "${HANDLER_DIR}/handle_file_change.everytime" ]; then
-    exec_and_continue "${HANDLER_DIR}/handle_file_change.everytime" "${FILE_PATH}"
+  if [ -x "${HANDLER_DIR}/.handle_file_change.everytime" ]; then
+    exec_and_continue "${HANDLER_DIR}/.handle_file_change.everytime" "${FILE_PATH}"
   fi
   # the first one of these handlers to 'hit' will cause the execution of
   # further handlers to stop, and we'll move on to the next event. First we
   # fire the 'all' handler if it exists.
-  if [ -x "${HANDLER_DIR}/handle_file_change.all" ]; then
-    exec_and_continue "${HANDLER_DIR}/handle_file_change.all" "${FILE_PATH}"
+  if [ -x "${HANDLER_DIR}/.handle_file_change.all" ]; then
+    exec_and_continue "${HANDLER_DIR}/.handle_file_change.all" "${FILE_PATH}"
     return 0
   fi
   # then we fire any individual file handlers we have (by extension)
-  if [ -x "${HANDLER_DIR}/handle_file_change.${EXT}" ]; then
-    exec_and_continue "${HANDLER_DIR}/handle_file_change.${EXT}" "${FILE_PATH}"
+  if [ -x "${HANDLER_DIR}/.handle_file_change.${EXT}" ]; then
+    exec_and_continue "${HANDLER_DIR}/.handle_file_change.${EXT}" "${FILE_PATH}"
     return 0
   fi
   # if we've not handled anything we give the chance to the 'any' handler
   # this one will only fire in the case that the neither the all nor a extension
   # specific handler has fired
-  if [ -x "${HANDLER_DIR}/handle_file_change.any" ]; then
-    exec_and_continue "${HANDLER_DIR}/handle_file_change.any" "${FILE_PATH}"
+  if [ -x "${HANDLER_DIR}/.handle_file_change.any" ]; then
+    exec_and_continue "${HANDLER_DIR}/.handle_file_change.any" "${FILE_PATH}"
     return 0
   fi
-  return 1
+  if [ "${HANDLER_DIR}" == "$(pwd)" -o "${HANDLER_DIR}" == "/" -o "${HANDLER_DIR}" == "${GLOBAL_HANDLER_DIR}" ]; then
+    return 1;
+  else
+    find_and_invoke_handler "$(dirname ${HANDLER_DIR})" "$FILE_PATH"
+  fi
+  return 0;
 }
 
 export -f find_and_invoke_handler
@@ -94,9 +106,12 @@ while read -r line;
 do
   # we want the absolute path so we can pass it to our handlers
   FILE_PATH=$(abspath $line)
-  # as a convenience we allow handlers by extension, so we'll pick off the extension
-  # for use in finding any handlers we may have
-  EXT=${FILE_PATH##*.}
+  FILE_NAME=$(basename $line)
+  if echo "${FILE_NAME}" | grep ^\\. 
+  then
+    echo "we ignore hidden files: " $FILE_PATH
+    continue
+  fi
   # The directory containing the file that changed, we use this to find any
   # directory specific handlers
   CHANGED_FILE_DIR=$(dirname ${FILE_PATH})
@@ -105,7 +120,7 @@ do
   if ! find_and_invoke_handler ${CHANGED_FILE_DIR} ${FILE_PATH}; then
     # if there's no handler local to the directory containing the changed file
     # then we look in the 'global' handler directory
-    if ! find_and_invoke_handler ${HANDLER_DIR} ${FILE_PATH}; then
+    if ! find_and_invoke_handler ${GLOBAL_HANDLER_DIR} ${FILE_PATH}; then
       printf "couldn't find any handlers for changed file %s\n" ${FILE_PATH}
     fi
   fi

@@ -1,6 +1,5 @@
 #! /usr/bin/env ./node_modules/.bin/coffee
 # vi:ft=coffee
-#
 getSomethingForCurrentTime = ->
   now = new Date()
   minutesSinceMidnight = (now.getHours() * 60) + now.getMinutes()
