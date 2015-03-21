@@ -1,16 +1,24 @@
-.PHONY: build
+.PHONY: build, watch
 SHELL=/usr/bin/env bash
 # the paths to all the coffee files under the app/ dir
 appcoffee := $(shell bash -c "shopt -s globstar ; echo app/**/*.coffee")
 
 serve: build 
-	cd site && python -m SimpleHTTPServer
+	cd built && exec python -m SimpleHTTPServer
 
-site/vendor.js: vendor/*.js
-	cat vendor/*.js > ./site/vendor.js
+built/vendor.js: vendor/*.js built
+	cat vendor/*.js > ./built/vendor.js
 
-site/app.js: $(appcoffee)
-	./node_modules/.bin/coffee --compile --bare --map --print $^ > ./site/app.js
+built/app.js: $(appcoffee) built
+	./node_modules/.bin/coffee --compile --bare --map --print $^ > ./built/app.js
 
-build: site/app.js site/vendor.js
-	./data/generate ./data/collections collections > ./site/js/data.js
+built/data.js: built
+	./data/generate ./data/collections collections > ./built/data.js
+
+built:
+	mkdir -p built
+
+build: built/app.js built/vendor.js built/data.js
+
+watch:
+	./node_modules/.bin/supervisor -w app,vendor -e coffee,js --exec /usr/bin/make --
