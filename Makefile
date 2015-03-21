@@ -1,4 +1,4 @@
-.PHONY: build, watch
+.PHONY: build watch clean
 SHELL=/usr/bin/env bash
 # the paths to all the coffee files under the app/ dir
 appcoffee := $(shell bash -c "shopt -s globstar ; echo app/**/*.coffee")
@@ -12,7 +12,7 @@ built/vendor.js: vendor/*.js built
 built/app.js: $(appcoffee) built
 	./node_modules/.bin/coffee --compile --bare --map --print $^ > ./built/app.js
 
-built/data.js: built
+built/data.js: built data/collections/*
 	./data/generate ./data/collections collections > ./built/data.js
 
 built:
@@ -25,3 +25,6 @@ build: built/app.js built/vendor.js built/data.js built/index.html
 
 watch:
 	./node_modules/.bin/supervisor -w app,vendor -e coffee,js --exec /usr/bin/make --
+
+clean:
+	rm -rf built/
