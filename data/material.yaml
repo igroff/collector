@@ -1,0 +1,114 @@
+-
+  name: cord
+  description: a short length of cording, useful for tying things together
+-
+  name: bolts
+  description: useful for more permanent attachment of two items together, especially if you use a little glue
+-
+  name: screws
+  description: useful for keeping two pieces of material together
+-
+  name: tape
+  description: handy for temporarily attaching things
+-
+  name: wire
+  description: while you can use this to attach things, it's really useful for moving electrons around
+-
+  name: nails
+  description: although there are exceptions, these are usually best for attaching two pieces of wood, forms a decent bond.
+-
+  name: hammer
+  description: you pretty much need to have one of these to get much use from nails
+-
+  name: netting
+  description: a loosely woven net, useful for catching things... maybe?
+-
+  name: mesh
+  description: kind of like netting but more finely woven and usually more rigid. Often used as the base for patching holes in things.
+-
+  name: gauze
+  description: good for soaking things up, where things is usually blood.
+-
+  name: glue
+  description: you can use this to stick almost anything to anything else!
+-
+  name: paint
+  description: a convenient way to hide your mistakes, or customize things
+-
+  name: varnish
+  description: makes a nice hard surface on things, helps protect them from wear and water damage
+-
+  name: wood
+  description: a piece o' tree
+-
+  name: tubing
+  description: all sorts of uses from tying things together, to moving liquids around.  Mostly we're concerned with moving liquids around
+-
+  name: pipe
+  description: kind of like tubing, only ridgid. Really useful for moving liquids around, or whacking people on the head.
+-
+  name: plank
+  description: typically a very regular piece of wood, although can be made from many different materials
+-
+  name: electric motor
+  description: if cars ran on electricity, this is what would make the wheels turn
+-
+  name: circuit board
+  description: if you ever want electronic 'things' to work together, you usually end up using one of these
+-
+  name: valve
+  description: well, if you've got pipes and tubing and you want more control than just holding your thumb over one end: you'll need one of these.
+-
+  name: heating element
+  description: useful for all sorts of things: drying stuff out, cooking things, keeping warm. See, all sorts of things
+-
+  name: burner
+  description: if you need to turn some sort of fuel into heat, this is your tool of choice.
+-
+  name: panel
+  description: good for covering large areas, usually come in rectangularish shapes in various sizes and materials. 
+-
+  name: beam
+  description: kind of plank-ish but generally more rigid and used for supporting things... like planks
+-
+  name: belt
+  description: while, you could use it to hold up your pants this one is usually used to transfer force from something like a motor to somewhere else
+-
+  name: chain
+  description: like a belt, only it's typically made of metal and does a better job of transferring that force
+-
+  name: glass
+  description: useful for keeping things separated, while allowing you to see those things.
+-
+  name: wax
+  description: often useful for making candles, or sealing things
+-
+  name: bearings
+  description: if it spins, and you want it to keep spinning you almost certainly need these.
+-
+  name: beads
+  description: surely these are useful for something
+-
+  name: gasket
+  description: helpful for keeping liquid going in the right direction
+-
+  name: CPU
+  description: wanna keep track of some complicated stuff, do some math, control lots of electronics, or collect data from sensors... This is your buddy.
+- 
+  name: micro controller
+  description: does a decent job of controlling electronics, and can even collect data from sensors, but if the job gets big enough you really need to find a CPU
+-
+  name: brackets
+  description: helpful for holding two items at a fixed angle, typically right.
+-
+  name: LEDs
+  decription: looking for light? These are where it's at
+-
+  name: sensors
+  description: if you need to collect any data, this is where you start
+- 
+  name: leather
+  description: good for all sorts of things, and it wears well too
+-
+  name: fabric
+  description: decent for covering yourself, and if you get enough it might even help keep you warm and protect you.
