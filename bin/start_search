@@ -1,0 +1,33 @@
+#! /usr/bin/env python
+"""
+    Usage: start_search <user_id> <searcher_id> <location> <duration>
+"""
+################################################################################
+# To start a search we need
+# user id - user_id
+# location to search - location
+# entity searching (player, drone, etc) - searcher_id
+# amount of time to search - duration
+#
+# Then we 
+# - check to make sure there are no searches for this searcher_id already in
+#   progress
+# - make note that the search started now, with the given parameters
+#
+# 
+################################################################################
+
+import boto
+from docopt import docopt
+
+ddb_connection = boto.connect_dynamodb()
+table = ddb_connection.get_table('collector_searches')
+arguments = docopt(__doc__, version='collector start_search v 0.0.1')
+user_id = arguments['<user_id>']
+searcher_id = arguments['<searcher_id>']
+location = arguments['<location>']
+duration = arguments['<duration>']
+
+existing_searches = table.get_item(user_id)
+
+
