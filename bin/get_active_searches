@@ -5,7 +5,7 @@ Usage:
     get_active_searches (--user_id=<user_id>)
 
 Options:
-    --user_id=<user_id>          user_id of the user searching
+    --user_id=<user_id>  user_id of for which active searhes will be returned
 """
 
 import os
