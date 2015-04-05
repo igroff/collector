@@ -1,15 +1,19 @@
 #! /usr/bin/env python
+""" What the fucking hell
+
+Usage:
+    start_search (--user_id=<user_id> --searcher_id=<searcher_id>, --location=<location>) [--duration=<duration>]
+
+Options:
+    --user_id=<user_id>          user_id of the user searching
+    --searcher_id=<searcher_id>  id of the searcher, can be the same as user_id
+    --location=<location>        The location of the search this can be a named
+        location or a set of lat,long coordinates
+    --duration=<duration>  Duration of the search in seconds [default: 86400]
 """
-    Usage: start_search <user_id> <searcher_id> <location> <duration>
-"""
+
 ################################################################################
-# To start a search we need
-# user id - user_id
-# location to search - location
-# entity searching (player, drone, etc) - searcher_id
-# amount of time to search - duration
-#
-# Then we 
+# To start a search we 
 # - check to make sure there are no searches for this searcher_id already in
 #   progress
 # - make note that the search started now, with the given parameters
@@ -17,17 +21,62 @@
 # 
 ################################################################################
 
+import os
+import sys
 import boto
+import time
+import logging
 from docopt import docopt
+from boto.dynamodb2.table import Table
+from boto.dynamodb2.exceptions import ItemNotFound
 
-ddb_connection = boto.connect_dynamodb()
-table = ddb_connection.get_table('collector_searches')
+class AlreadySearchingException(Exception):
+    """ Raised in the case of there being an active search when
+        trying to start a new search
+    """
+
+boto.connect_dynamodb()
+table = Table('collector_searches_2')
 arguments = docopt(__doc__, version='collector start_search v 0.0.1')
-user_id = arguments['<user_id>']
-searcher_id = arguments['<searcher_id>']
-location = arguments['<location>']
-duration = arguments['<duration>']
+user_id = arguments['--user_id']
+searcher_id = arguments['--searcher_id']
+location = arguments['--location']
+duration = arguments['--duration']
+start_time = int(time.time())
 
-existing_searches = table.get_item(user_id)
+current_module = sys.modules[__name__]
+current_module.__dict__['pants'] = 'blue'
+print(dir(current_module))
+print pants
+sys.exit(0)
+
+logging.getLogger().setLevel(os.environ.get("LOG_LEVEL", "DEBUG"))
+logging.debug("%s" % (sys.argv))
+# so we check to make sure there are no active searches by our provided searcher
+# we do this by querying out all the searches available for this searcher, then
+# check for active ones. 
+# In this case, active is defined as having a start_date + duration which is
+# greater than the current time. All times are in UTC
+
+# so, get the entries for this user (something else keeps this cleaned up
+# so it will generally only have active searches in it.. but we never can
+# be sure )
+for search_entry in table.query_2(user_id__eq=user_id):
+    search_duration = int(search_entry['duration'])
+    search_start = int(search_entry['start_time'])
+    search_er = search_entry['searcher_id']
+    # determine if the search is currently underway
+    is_active = (search_duration + search_start) > int(time.time())
+    if is_active and searcher_id == search_er:
+        raise AlreadySearchingException()
+
+new_entry = dict(user_id=user_id, location=location, searcher_id=searcher_id, duration=duration, start_time=start_time)
+logging.debug("storing search entry:\n%s" % (search_entry))
+table.put_item(new_entry, True)
+
+
+
+
+
 
 

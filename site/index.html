@@ -43,7 +43,7 @@
     itemFound.count = 1
     itemFound.lastFound = new Date()
     if itemFound
-      existingItem = _.find(userData.collected, (i) -> i.item is itemFound.item)
+      existingItem = _.find(userData.collected, (i) -> i.item.id is itemFound.item.id)
       if existingItem
         existingItem.count += itemFound.count
         existingItem.lastFound = itemFound.lastFound
@@ -53,16 +53,16 @@
     localStorage.setItem storageKey, JSON.stringify(userData)
     template = """
       <div>
-        You found: <span>{justFound.item}: {justFound.type}</span>
+        You found: <span>{justFound.item.name}: {justFound.type}</span>
       </div>
       <div class="wrapper">
         <ul>
-          <li each="data.collected">{item}: {type}<span data-visible="moreThanOne"> ({count})</span></li>
+          <li each="data.collected">{item.name}: {type}<span data-visible="moreThanOne"> ({count})</span></li>
         </ul>
       </div>
     """
     _.each(userData.collected, (i) -> i.moreThanOne = (i?.count > 1))
-    userData.collected = _.sortBy(userData.collected, (i) -> i.item)
+    userData.collected = _.sortBy(userData.collected, (i) -> i.item.id)
     $( $("#container").append(reactive(template, data: userData, justFound:itemFound).el) )
   </script>
   <script type="text/javascript">

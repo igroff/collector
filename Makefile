@@ -24,7 +24,7 @@ built/index.html: site/index.html
 build: built/app.js built/vendor.js built/data.js built/index.html
 
 watch:
-	./node_modules/.bin/supervisor -w app,vendor -e coffee,js --exec /usr/bin/make -- serve
+	./node_modules/.bin/supervisor -w site,app,vendor -e html,css,coffee,js --exec /usr/bin/make -- serve
 
 clean:
 	rm -rf built/
