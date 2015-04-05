@@ -28,6 +28,9 @@ logging.getLogger().setLevel(os.environ.get("LOG_LEVEL", "INFO"))
 
 entries = []
 for search_entry in table.query_2(user_id__eq=user_id):
-    entries.append(search_entry.get_keys())
+    entry = {}
+    for key in search_entry.keys():
+        entry[key] = search_entry[key]
+    entries.append(entry)
 
 print(json.dumps(dict(active_searches=entries)))
