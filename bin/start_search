@@ -12,15 +12,6 @@ Options:
     --duration=<duration>  Duration of the search in seconds [default: 86400]
 """
 
-################################################################################
-# To start a search we 
-# - check to make sure there are no searches for this searcher_id already in
-#   progress
-# - make note that the search started now, with the given parameters
-#
-# 
-################################################################################
-
 import os
 import sys
 import boto
@@ -30,28 +21,18 @@ from docopt import docopt
 from boto.dynamodb2.table import Table
 from boto.dynamodb2.exceptions import ItemNotFound
 
-class AlreadySearchingException(Exception):
-    """ Raised in the case of there being an active search when
-        trying to start a new search
-    """
+from helpers import define_docopt_vars
+from app_exceptions import AlreadySearchingException
 
 boto.connect_dynamodb()
 table = Table('collector_searches_2')
 arguments = docopt(__doc__, version='collector start_search v 0.0.1')
-user_id = arguments['--user_id']
-searcher_id = arguments['--searcher_id']
-location = arguments['--location']
-duration = arguments['--duration']
+define_docopt_vars(arguments, __name__)
 start_time = int(time.time())
 
-current_module = sys.modules[__name__]
-current_module.__dict__['pants'] = 'blue'
-print(dir(current_module))
-print pants
-sys.exit(0)
-
-logging.getLogger().setLevel(os.environ.get("LOG_LEVEL", "DEBUG"))
+logging.getLogger().setLevel(os.environ.get("LOG_LEVEL", "INFO"))
 logging.debug("%s" % (sys.argv))
+
 # so we check to make sure there are no active searches by our provided searcher
 # we do this by querying out all the searches available for this searcher, then
 # check for active ones. 
@@ -71,8 +52,8 @@ for search_entry in table.query_2(user_id__eq=user_id):
         raise AlreadySearchingException()
 
 new_entry = dict(user_id=user_id, location=location, searcher_id=searcher_id, duration=duration, start_time=start_time)
-logging.debug("storing search entry:\n%s" % (search_entry))
-table.put_item(new_entry, True)
+logging.debug("storing search entry:\n%s" % (new_entry))
+table.put_item(new_entry)
 
 
 

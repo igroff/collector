@@ -1,0 +1,33 @@
+#! /usr/bin/env python
+""" What the fucking hell
+
+Usage:
+    get_active_searches (--user_id=<user_id>)
+
+Options:
+    --user_id=<user_id>          user_id of the user searching
+"""
+
+import os
+import sys
+import boto
+import simplejson as json
+import logging
+from docopt import docopt
+from boto.dynamodb2.table import Table
+from boto.dynamodb2.exceptions import ItemNotFound
+
+from helpers import define_docopt_vars
+
+boto.connect_dynamodb()
+table = Table('collector_searches_2')
+arguments = docopt(__doc__, version='collector start_search v 0.0.1')
+define_docopt_vars(arguments, __name__)
+
+logging.getLogger().setLevel(os.environ.get("LOG_LEVEL", "INFO"))
+
+entries = []
+for search_entry in table.query_2(user_id__eq=user_id):
+    entries.append(search_entry.get_keys())
+
+print(json.dumps(dict(active_searches=entries)))
