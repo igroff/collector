@@ -15,14 +15,15 @@ import sys
 import boto
 import simplejson as json
 import logging
-import boto.dynamodb.layer1
 from docopt import docopt
+from boto.dynamodb2.exceptions import ItemNotFound
+from boto.dynamodb2.table import Table
 from boto.dynamodb2.exceptions import ItemNotFound
 
 from helpers import define_docopt_vars
 
-connection = boto.connect_dynamodb()
-help(boto.dynamodb.layer1)
 arguments = docopt(__doc__)
 define_docopt_vars(arguments, __name__)
-boto.dynamodb.layer1.Layer1().delete_item("collector_searches2", dict(user_id=user_id), dict(searcher_id__eq=searcher_id))
+connection = boto.connect_dynamodb()
+table = Table('collector_searches_2')
+table.delete_item(conditional_operator=dict(user_id__eq=user_id, searcher_id__eq=searcher_id))

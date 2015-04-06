@@ -1,6 +1,5 @@
 #! /usr/bin/env python
-""" What the fucking hell
-
+"""
 Usage:
     start_search (--user_id=<user_id> --searcher_id=<searcher_id>, --location=<location>) [--duration=<duration>]
 
@@ -16,44 +15,28 @@ import os
 import sys
 import boto
 import time
-import logging
 from docopt import docopt
 from boto.dynamodb2.table import Table
-from boto.dynamodb2.exceptions import ItemNotFound
+from boto.dynamodb2.exceptions import ItemNotFound, ConditionalCheckFailedException
 
 from helpers import define_docopt_vars
+import config
+from config import log
 from app_exceptions import AlreadySearchingException
 
 boto.connect_dynamodb()
-table = Table('collector_searches_2')
-arguments = docopt(__doc__, version='collector start_search v 0.0.1')
+table = Table(config.search_table_name)
+arguments = docopt(__doc__)
 define_docopt_vars(arguments, __name__)
 start_time = int(time.time())
 
-logging.getLogger().setLevel(os.environ.get("LOG_LEVEL", "INFO"))
-logging.debug("%s" % (sys.argv))
-
-# so we check to make sure there are no active searches by our provided searcher
-# we do this by querying out all the searches available for this searcher, then
-# check for active ones. 
-# In this case, active is defined as having a start_date + duration which is
-# greater than the current time. All times are in UTC
-
-# so, get the entries for this user (something else keeps this cleaned up
-# so it will generally only have active searches in it.. but we never can
-# be sure )
-for search_entry in table.query_2(user_id__eq=user_id):
-    search_duration = int(search_entry['duration'])
-    search_start = int(search_entry['start_time'])
-    search_er = search_entry['searcher_id']
-    # determine if the search is currently underway
-    is_active = (search_duration + search_start) > int(time.time())
-    if is_active and searcher_id == search_er:
-        raise AlreadySearchingException()
-
 new_entry = dict(user_id=user_id, location=location, searcher_id=searcher_id, duration=duration, start_time=start_time)
-logging.debug("storing search entry:\n%s" % (new_entry))
-table.put_item(new_entry)
+log.debug("storing search entry:\n%s" % (new_entry))
+try:
+    table.put_item(new_entry)
+except ConditionalCheckFailedException, e:
+    raise AlreadySearchingException(e)
+    
 
 
 
