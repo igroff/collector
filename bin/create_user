@@ -1,0 +1,27 @@
+#!/usr/bin/env python
+"""
+Usage:
+    create_user --user_id=<user_id> --user_data=<user_data>
+
+Options:
+    --user_id=<user_id>  The id_of the user to create
+    --user_data=<user_data>  JSON reprsentation of user data
+
+"""
+
+import boto
+import config
+import simplejson as json
+from config import log
+from docopt import docopt
+from boto.dynamodb2.table import Table
+from boto.dynamodb2.exceptions import ItemNotFound
+
+from helpers import define_docopt_vars
+
+arguments = docopt(__doc__)
+define_docopt_vars(arguments, __name__)
+connection = boto.connect_dynamodb()
+table = Table(config.user_table_name)
+user = dict(user_id=user_id, **json.loads(user_data))
+table.put_item(data=user)
