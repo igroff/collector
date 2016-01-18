@@ -20,78 +20,95 @@
     }
     .hidden { display: none; }
   </style>
-  <script type="text/javascript" src="data.js"></script>
-  <script type="text/javascript" src="vendor.js"></script>
-  <script type="text/javascript" src="app.js"></script>
-  <script type="text/coffeescript">
-    defaultData =
-      lastCheck: new Date()
-      collected: []
-    storageKey = "storedHereMang"
-
-    userData = localStorage.getItem(storageKey)
-    try
-      throw "no data" unless userData
-      userData = JSON.parse(userData) # if we got it from local storage, we'll need to turn it into an object
-    catch
-      # if we had a failure converting it to an object, we'll just start over
-      userData = defaultData
-
-    userData.lastCheck = new Date()
-    # get a new 'normal' one
-    itemFound = getSomethingStraightUp()
-    itemFound.count = 1
-    itemFound.lastFound = new Date()
-    if itemFound
-      existingItem = _.find(userData.collected, (i) -> i.item.id is itemFound.item.id)
-      if existingItem
-        existingItem.count += itemFound.count
-        existingItem.lastFound = itemFound.lastFound
-      else
-        userData.collected.push itemFound
-
-    localStorage.setItem storageKey, JSON.stringify(userData)
-    template = """
-      <div>
-        You found: <span>{justFound.item.name}: {justFound.type}</span>
-      </div>
-      <div class="wrapper">
-        <ul>
-          <li each="data.collected">{item.name}: {type}<span data-visible="moreThanOne"> ({count})</span></li>
-        </ul>
-      </div>
-    """
-    _.each(userData.collected, (i) -> i.moreThanOne = (i?.count > 1))
-    userData.collected = _.sortBy(userData.collected, (i) -> i.item.id)
-    $( $("#container").append(reactive(template, data: userData, justFound:itemFound).el) )
-  </script>
+  <script src="js/lodash.min.js"></script>
+  <script src="js/jquery.min.js"></script>
   <script type="text/javascript">
-    function PositionInfo(){
-      this.coords = null;
-      this.position = null;
-      this.coordsJSON = null;
-      var posHandler = function(position){
-        this.coords = position.coords;
-        this.position = position
-        this.coordsJSON = JSON.stringify(this.coords, null, 2);
-        console.log("position info", this.position);
-      };
-      var errorHandler = function(err){
-        if (err){
-          console.log("error fetching location info", err);
+    window.debug = true;
+    var storageKey = 'itsacollectorkeymang';
+    var log = {
+      debug: function(msg){
+        if (window.debug){
+          console.log("[DEBUG] " + msg);
         }
-      };
-      navigator.geolocation.getCurrentPosition(
-        posHandler,
-        errorHandler,
-        {enableHighAccuracy: false, timeout: 5000, maximumAge: 60000}
-      );
+      },
+      info: function(msg){
+        console.log("[INFO] " + msg);
+      },
+      error: function(msg){
+        console.log("[ERROR] " + msg);
+      }
+    };
+    function save(){
+      window.localStorage.setItem(storageKey, JSON.stringify(gameState));
     }
-    var positionInfo = new PositionInfo();
-  </script>
+    function createDefaultGameData(){
+      return {
+        // this is dependent up the resources available
+        maxSearches: 2,
+        // This is used to track the last time we ticked so if the
+        // app is suspended we can still calculate updates
+        lastTickAt: new Date().getTime(),
+        activeSearches: [],
+      };
+    }
+    function clearSave(){
+      window.localStorage.removeItem(storageKey);
+      window.location.reload();
+    }
+    function load(){
+      var state = window.localStorage.getItem(storageKey);
+      try {
+        state = JSON.parse(state);
+      } catch(e) { 
+        log.error("error loading saved game data: " + e.message); 
+      }
+
+      if (_.isObject(state)){
+        log.debug("existing game data loaded");
+        return state;
+      } else {
+        log.debug("no existing game data, creating default data");
+        return createDefaultGameData();
+      }
+    }
+    /* Main game loop */
+    function tick(){ // returns void
+    }
+    /* this is how you speed up search activities
+    */
+    function tickleSearch(search){ // returns void
+    }
+    function searchClick() { startSearch(gameState); }
+    function startSearch(gameState){ // returns NEW search object
+      // can't start more than maxSearches
+      if (gameState.activeSearches.length >= gameState.maxSearches){
+        log.debug("max searches (" + gameState.maxSearches + ") hit, not starting requested search");
+        return null;
+      }
+      log.debug("starting a new search");
+      var newSearch = {
+        startTime: new Date().getTime(),
+        locationInfo: null
+      };
+      gameState.activeSearches.push(newSearch);
+      return newSearch;
+    } 
+    function endSearch(search, gameState){ // returns void
+    }
+
+    var gameState = load();
+    window.setInterval(save, 5000);
+    window.gameState = gameState;
+    
   </script>
 </head>
 <body>
-  <div id="container"></div>
+  <div id="searches">
+    
+  </div>
+  <div id="controls">
+    <button onClick="searchClick()">Start</button>
+    <button onClick="clearSave()">Reset</button>
+  </div>
 </body>
 </html>
