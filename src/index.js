@@ -2,27 +2,29 @@
 var React = require('react');
 var ReactDOM = require('react-dom');
 var log = require('simplog');
+var persist = require('./persistence.js');
 
 global.debug = true;
+var gameState = persist.loadGameData();
 
 var SearchButton = React.createClass({
   startSearch: function(e){
     log.debug("starting search");
+    this.props.state.activeSearches.push({"new":"search"});
+    persist.saveGameData(gameState);
   },
   render: function(props){
     return (
-     <div>
-       <input type="button" onClick={this.startSearch} value="Start Input Search"/>
        <button onClick={this.startSearch}>Start Search</button> 
-     </div>
     );
   }
 });
 
 ReactDOM.render(
-  <div>
-    <h1>Hello, world! And Stuff. And other Things.</h1>
-    <SearchButton/>
-  </div>,
-  document.getElementById('example')
+    <div>
+      <h1>Howdy Bitches!</h1>
+      <SearchButton state={gameState}/>
+    </div>
+  , document.getElementById('example')
 );
+
