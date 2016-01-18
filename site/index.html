@@ -4,111 +4,13 @@
 <title></title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
-    /* allow room for 3 columns */
-    ul {
-      width: 30em;
-    }  /* float & allow room for the widest item */
-    ul li {
-      float: left; width: 10em; 
-    }  /* stop the float */
-    li { text-decoration: none; } 
-    br {
-      clear: left;
-    }  /* separate the list from subsequent markup */
-    div.wrapper {
-      margin-bottom: 1em;
-    }
-    .hidden { display: none; }
   </style>
   <script src="js/lodash.min.js"></script>
   <script src="js/jquery.min.js"></script>
-  <script type="text/javascript">
-    window.debug = true;
-    var storageKey = 'itsacollectorkeymang';
-    var log = {
-      debug: function(msg){
-        if (window.debug){
-          console.log("[DEBUG] " + msg);
-        }
-      },
-      info: function(msg){
-        console.log("[INFO] " + msg);
-      },
-      error: function(msg){
-        console.log("[ERROR] " + msg);
-      }
-    };
-    function save(){
-      window.localStorage.setItem(storageKey, JSON.stringify(gameState));
-    }
-    function createDefaultGameData(){
-      return {
-        // this is dependent up the resources available
-        maxSearches: 2,
-        // This is used to track the last time we ticked so if the
-        // app is suspended we can still calculate updates
-        lastTickAt: new Date().getTime(),
-        activeSearches: [],
-      };
-    }
-    function clearSave(){
-      window.localStorage.removeItem(storageKey);
-      window.location.reload();
-    }
-    function load(){
-      var state = window.localStorage.getItem(storageKey);
-      try {
-        state = JSON.parse(state);
-      } catch(e) { 
-        log.error("error loading saved game data: " + e.message); 
-      }
-
-      if (_.isObject(state)){
-        log.debug("existing game data loaded");
-        return state;
-      } else {
-        log.debug("no existing game data, creating default data");
-        return createDefaultGameData();
-      }
-    }
-    /* Main game loop */
-    function tick(){ // returns void
-    }
-    /* this is how you speed up search activities
-    */
-    function tickleSearch(search){ // returns void
-    }
-    function searchClick() { startSearch(gameState); }
-    function startSearch(gameState){ // returns NEW search object
-      // can't start more than maxSearches
-      if (gameState.activeSearches.length >= gameState.maxSearches){
-        log.debug("max searches (" + gameState.maxSearches + ") hit, not starting requested search");
-        return null;
-      }
-      log.debug("starting a new search");
-      var newSearch = {
-        startTime: new Date().getTime(),
-        locationInfo: null
-      };
-      gameState.activeSearches.push(newSearch);
-      return newSearch;
-    } 
-    function endSearch(search, gameState){ // returns void
-    }
-
-    var gameState = load();
-    window.setInterval(save, 5000);
-    window.gameState = gameState;
-    
-  </script>
 </head>
 <body>
-  <div id="searches">
-    
+  <div id="example">
   </div>
-  <div id="controls">
-    <button onClick="searchClick()">Start</button>
-    <button onClick="clearSave()">Reset</button>
-  </div>
+  <script src="js/app.js"></script>
 </body>
 </html>
