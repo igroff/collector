@@ -1,7 +1,11 @@
-.PHONY: build watch
+.PHONY: build watch sleep-build
 
 build:
-	./node_modules/.bin/browserify -t [ babelify --presets [ react ] ] src/main.js -o site/js/app.js
+	./node_modules/.bin/browserify -t [ babelify --presets [ react ] ] src/index.js -o site/js/app.js
 	
+sleep-build: build
+	@echo hanging around until we die
+	sleep 999
+
 watch:
-	./node_modules/.bin/babel --presets react src --watch --out-file site/js/app.js
+	./node_modules/.bin/supervisor --watch src/ --exec make sleep-build
