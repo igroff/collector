@@ -30,15 +30,16 @@ var SearchInfo = React.createClass({
 });
 
 var SearchInfoList = React.createClass({
-  getActiveSearches: function(){
-    return gameState.activeSearches;
+  getInitialState: function(){
+    return {searches: []};
   },
-  getInitialState: function(){ return {searches: []}; },
-  componentDidMount: function(){ this.setState({searches: this.getActiveSearches()}); },
+  componentDidMount: function(){
+    this.setState({searches: this.props.searches});
+  },
   render: function(){
-    var searchInfos = _.map(this.state.searches, function(search){
+    var searchInfos = _.map(this.state.searches, function(search, index){
       return(
-        <li><SearchInfo search={search}/></li>
+        <li key={index}><SearchInfo search={search}/></li>
       );
     });
     return (
