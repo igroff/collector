@@ -18,10 +18,17 @@ function activeSearches(state, action){
     // created one
     return newSearches;
   }
+  // if we get here, we've done nothing and are just passing back the state
+  // as it was provided to us
   return state;
 }
 
+var combinedReducers = combineReducers({ activeSearches: activeSearches });
+
 module.exports = function (state, action){
+  // we handle the 'delete save' behavior at the top level because it's action is
+  // explicitly to reset the _whole state_ of the app, where as the reducers 
+  // added through combinedReducers are specific to keys within the state object
   if (action.type === constants.CLEAR_SAVE){
     // delete any saved data we have
     persistence.deleteGameData();
@@ -29,5 +36,5 @@ module.exports = function (state, action){
     // accordingly
     state = undefined;
   }
-  return combineReducers({ activeSearches: activeSearches })(state, action);
+  return combinedReducers(state, action);
 };
