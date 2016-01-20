@@ -23,7 +23,7 @@ function loadGameData(){
   } catch(e) {
     log.error("unable to load game data " + e.message);
     log.debug(e.stack);
-    o = createDefaultGameData();
+    o = undefined;
   }
   return o;
 }
